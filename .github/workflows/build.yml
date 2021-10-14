@@ -19,9 +19,6 @@ concurrency:
   group: build
   cancel-in-progress: true
 
-env:
-  PATH: ""
-
 on:
   push:
     branches:
@@ -89,7 +86,6 @@ jobs:
           curl -LsSf https://nim-lang.org/choosenim/init.sh > choosenim.sh
           sh choosenim.sh -y
           export PATH=/home/runner/.nimble/bin:$PATH
-          echo 'export PATH=/home/runner/.nimble/bin:$PATH' >> ~/.bashrc
-          echo 'export PATH=/home/runner/.nimble/bin:$PATH' >> ~/.profile
+          echo 'export PATH=/home/runner/.nimble/bin:$PATH' >> $GITHUB_ENV
           choosenim ${{ matrix.nim }}
       - run: env;exit 1;./${{ matrix.buildHost }}-run.sh ${{ matrix.platform }}/build
