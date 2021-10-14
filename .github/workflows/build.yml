@@ -83,6 +83,7 @@ jobs:
           key: ${{ matrix.buildHost }}-choosenim }}
       - id: install-nim
         run: |
-          curl https://nim-lang.org/choosenim/init.sh -sSf | sh
+          curl -LsSf https://nim-lang.org/choosenim/init.sh > choosenim.sh
+          sh choosenim.sh -y
           choosenim ${{ matrix.nim }}
       - run: nim r ${{ matrix.platform }}/build
