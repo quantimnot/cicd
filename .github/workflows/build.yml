@@ -66,8 +66,6 @@ jobs:
           # - edge-wasm
     steps:
       - uses: actions/checkout@v2
-        with:
-          token: ${{ secrets.PAT }}
       - id: cache-nimble
         uses: actions/cache@v1
         with:
