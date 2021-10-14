@@ -86,6 +86,6 @@ jobs:
           curl -LsSf https://nim-lang.org/choosenim/init.sh > choosenim.sh
           sh choosenim.sh -y
           export PATH=/home/runner/.nimble/bin:$PATH
-          echo 'PATH=/home/runner/.nimble/bin:$PATH' >> $GITHUB_ENV
+          echo "PATH=/home/runner/.nimble/bin:$PATH" >> $GITHUB_ENV
           choosenim ${{ matrix.nim }}
       - run: ./${{ matrix.buildHost }}-run.sh ${{ matrix.platform }}/build
