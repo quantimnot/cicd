@@ -1,6 +1,6 @@
 #!/bin/sh -Cue
 
-.github/workflows/ubuntu-latest-tor.sh
+./ubuntu-latest-tor.sh
 
 nimble install -Y
 
