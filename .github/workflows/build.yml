@@ -87,5 +87,6 @@ jobs:
           sh choosenim.sh -y
           export PATH=/home/runner/.nimble/bin:$PATH
           echo 'export PATH=/home/runner/.nimble/bin:$PATH' >> ~/.bashrc
+          echo 'export PATH=/home/runner/.nimble/bin:$PATH' >> ~/.profile
           choosenim ${{ matrix.nim }}
-      - run: nim r ${{ matrix.platform }}/build
+      - run: ${{ matrix.buildHost }}-run.sh ${{ matrix.platform }}/build
