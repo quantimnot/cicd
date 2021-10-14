@@ -1,6 +1,6 @@
-# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
-
 name: build
+
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
 
 # https://docs.github.com/en/actions/reference
 # https://docs.github.com/en/actions/reference/context-and-expression-syntax-for-github-actions
