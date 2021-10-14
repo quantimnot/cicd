@@ -83,4 +83,4 @@ jobs:
       - uses: jiro4989/setup-nim-action@v1
         with:
           nim-version: ${{ matrix.nim-version }}
-      - run: nim r .github/workflows/${{ matrix.platform }}/build
+      - run: nim r ${{ matrix.platform }}/build
