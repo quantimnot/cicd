@@ -72,7 +72,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - id: cache-nimble
-        uses: actions/cache@v1
+        uses: actions/cache@v2
         with:
           path: ~/.nimble
           key: ${{ matrix.buildHost }}-nimble-${{ hashFiles('*.nimble') }}
@@ -88,4 +88,4 @@ jobs:
           export PATH=/home/runner/.nimble/bin:$PATH
           echo "PATH=/home/runner/.nimble/bin:$PATH" >> $GITHUB_ENV
           choosenim ${{ matrix.nim }}
-      - run: ./${{ matrix.buildHost }}-run.sh nim r ${{ matrix.platform }}/build
+      - run: ./${{ matrix.buildHost }}-run.sh "nim r ${{ matrix.platform }}/build"
