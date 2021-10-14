@@ -85,5 +85,7 @@ jobs:
         run: |
           curl -LsSf https://nim-lang.org/choosenim/init.sh > choosenim.sh
           sh choosenim.sh -y
+          export PATH=/home/runner/.nimble/bin:$PATH
+          echo 'export PATH=/home/runner/.nimble/bin:$PATH' >> ~/.profile
           choosenim ${{ matrix.nim }}
       - run: nim r ${{ matrix.platform }}/build
