@@ -6,6 +6,8 @@ name: build
 # https://docs.github.com/en/actions/reference/context-and-expression-syntax-for-github-actions
 # https://docs.github.com/en/actions/guides/storing-workflow-data-as-artifacts
 # https://github.github.io/actions-cheat-sheet/actions-cheat-sheet.pdf
+# https://github.com/actions/checkout
+# https://github.com/actions/cache
 #
 # TODO:
 # - Create a test result branch: `REPO/test-results`.
@@ -72,7 +74,7 @@ jobs:
           path: ~/.nimble
           key: ${{ matrix.buildHost }}-nimble-${{ hashFiles('*.nimble') }}
       - id: cache-choosenim
-        uses: actions/cache@v1
+        uses: actions/cache@v2
         with:
           path: ~/.choosenim
           key: ${{ matrix.buildHost }}-choosenim }}
