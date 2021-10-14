@@ -88,4 +88,4 @@ jobs:
           export PATH=/home/runner/.nimble/bin:$PATH
           echo "PATH=/home/runner/.nimble/bin:$PATH" >> $GITHUB_ENV
           choosenim ${{ matrix.nim }}
-      - run: ./${{ matrix.buildHost }}-run.sh ${{ matrix.platform }}/build
+      - run: ./${{ matrix.buildHost }}-run.sh nim r ${{ matrix.platform }}/build
