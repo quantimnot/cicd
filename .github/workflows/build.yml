@@ -19,6 +19,9 @@ concurrency:
   group: build
   cancel-in-progress: true
 
+env:
+  PATH: ""
+
 on:
   push:
     branches:
