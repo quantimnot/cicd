@@ -115,6 +115,7 @@ Creating a tag:
 
 * https://developer.microsoft.com/en-us/microsoft-store/
 * https://docs.microsoft.com/en-us/windows/uwp/publish/
+* https://gist.github.com/vszakats/7ef9e86506f5add961bae0412ecbe696
 
 ### Firefox
 

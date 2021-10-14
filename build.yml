@@ -1,0 +1,86 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+
+name: build
+
+# https://docs.github.com/en/actions/reference
+# https://docs.github.com/en/actions/reference/context-and-expression-syntax-for-github-actions
+# https://docs.github.com/en/actions/guides/storing-workflow-data-as-artifacts
+# https://github.github.io/actions-cheat-sheet/actions-cheat-sheet.pdf
+#
+# TODO:
+# - Create a test result branch: `REPO/test-results`.
+# - Commit test outputs to the test result branch.
+# https://stackoverflow.com/questions/57921401/push-to-origin-from-github-action/58393457#58393457
+
+
+concurrency:
+  group: build
+  cancel-in-progress: true
+
+on:
+  pull_request:
+    types: [ assigned, opened, synchronize, reopened ]
+  push:
+    branches:
+      - test-github-actions
+
+jobs:
+  noskipci:
+    runs-on: ubuntu-latest
+    if: "! contains(github.event.head_commit.message, '[skip ci]')"
+    steps:
+      - run: echo "not contains '[skip ci]'"
+  autotest:
+    runs-on: ${{ matrix.buildHost }}
+    needs: noskipci
+    strategy:
+      fail-fast: false
+      matrix:
+        buildHost:
+          - ubuntu-latest
+          # - macos-latest
+          # - windows-latest
+        platform:
+          - linux-native
+          # - android-native
+          # - android-sim
+          # - firefox-js
+          # - chrome-js
+          # - android-chrome-js
+          # - firefox-emscripten
+          # - chrome-emscripten
+          # - android-chrome-emscripten
+          # - firefox-wasm
+          # - chrome-wasm
+          # - android-chrome-wasm
+          # - macos-native
+          # - ios-native
+          # - ios-sim
+          # - safari-js
+          # - ios-safari-js
+          # - safari-emscripten
+          # - ios-safari-emscripten
+          # - safari-wasm
+          # - ios-safari-wasm
+          # - windows-native
+          # - edge-js
+          # - edge-emscripten
+          # - edge-wasm
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          token: ${{ secrets.PAT }}
+      - id: cache-nimble
+        uses: actions/cache@v1
+        with:
+          path: ~/.nimble
+          key: ${{ matrix.buildHost }}-nimble-${{ hashFiles('*.nimble') }}
+      - id: cache-choosenim
+        uses: actions/cache@v1
+        with:
+          path: ~/.choosenim
+          key: ${{ matrix.buildHost }}-choosenim }}
+      - uses: jiro4989/setup-nim-action@v1
+        with:
+          nim-version: ${{ matrix.nim-version }}
+      - run: nim r .github/workflows/${{ matrix.platform }}/build

@@ -1,6 +1,7 @@
-import tor
+# import tor
 
 proc checkruntime() =
+  discard
   ## Check the state of `buildserver`'s runtime dependencies.
   # let c = connect_to_controller()
   # discard c.list_onion_services()
@@ -14,10 +15,15 @@ proc serve(keyfile: string) =
   ## Serve build environment.
   discard
 
+proc build(target: string) =
+  ## Build the target.
+  discard
+
 when isMainModule:
   import cligen
   dispatchMulti(
     [checkruntime],
     [genkeys, help = {"auth-keys": "additional auth keys"}],
-    [serve, help = {"key-file": "path to build server keys"}]
+    [serve, help = {"key-file": "path to build server keys"}],
+    [build, help = {"build": "build target"}]
   )
