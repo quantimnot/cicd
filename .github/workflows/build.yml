@@ -30,7 +30,7 @@ jobs:
     if: "! contains(github.event.head_commit.message, '[skip ci]')"
     steps:
       - run: echo "not contains '[skip ci]'"
-  autotest:
+  build:
     runs-on: ${{ matrix.buildHost }}
     needs: noskipci
     strategy:
@@ -66,6 +66,9 @@ jobs:
           # - edge-js
           # - edge-emscripten
           # - edge-wasm
+        nim:
+          - stable
+          # - devel
     steps:
       - uses: actions/checkout@v2
       - id: cache-nimble
@@ -78,7 +81,8 @@ jobs:
         with:
           path: ~/.choosenim
           key: ${{ matrix.buildHost }}-choosenim }}
-      - uses: jiro4989/setup-nim-action@v1
-        with:
-          nim-version: ${{ matrix.nim-version }}
+      - id: install-nim
+        run: |
+          curl https://nim-lang.org/choosenim/init.sh -sSf | sh
+          choosenim ${{ matrix.nim }}
       - run: nim r ${{ matrix.platform }}/build
