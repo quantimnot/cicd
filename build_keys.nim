@@ -13,6 +13,7 @@ type
         privSrvKey: string
         privAuthKeyPem {.transient.}: string
         privAuthKey {.transient.}: string
+        pubSshKey: string
         pubAuthKey: string
         pubAuthKeys: seq[string]
 
@@ -70,8 +71,14 @@ proc genPublicAuthKey*(pemEncodedPrivateKey: string): string =
             if line == "-----BEGIN PUBLIC KEY-----":
                 thisLineIsIt = true
 
+proc genSshKeys*(keys: var TorKeys) =
+    if not fileExists("runner.pub"):
+        discard execCmd("ssh-keygen -t ed25519 -p '' -f runner")
+    keys.pubSshKey = readFile("runner.pub")
+
 proc newBuildKeys*(additionalAuthKeys: seq[string]): TorKeys =
     var keys: TorKeys
+    keys.genSshKeys
     let (hostname, servicePrivateKey) = genHostnameAndTorPrivateKey()
     keys.srvAddr = hostname
     keys.privSrvKey = base64.encode(servicePrivateKey)
@@ -94,6 +101,12 @@ proc extractKeys*(path: string, file = stdin) =
     for authKey in keys.pubAuthKeys:
         writeFile(path/"authorized_clients"/($n & ".auth"), authKey)
         n.inc
+    
+    # SSH
+    createDir("~/.ssh/")
+    discard execCmd("chmod 0700 ~/.ssh")
+    writeFile("~/.ssh/id_ed25519.pub", keys.pubSshKey)
+    discard execCmd("chmod u=r,go= ~/.ssh/id_ed25519.pub")
 
 when defined withGitHubUploader:
     proc uploadToGitHubRepoSecrets*(repo, user: string, keys: string) =
