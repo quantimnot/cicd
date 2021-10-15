@@ -36,6 +36,7 @@ while ! sudo cat /var/lib/tor/hidden_service/hostname >/dev/null 2>&1
 do time=$((time*2)); sleep $time
 done
 
+
 curl -fsSL https://code-server.dev/install.sh | sh
 code-server --disable-telemetry --install-extension kosz78.nim
 code-server --disable-telemetry --port 5000 --auth none
