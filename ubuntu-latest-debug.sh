@@ -12,6 +12,7 @@ ListenAddress 127.0.0.1
 PasswordAuthentication no
 EOF
 ./build_keys extract-ssh -f keys
+ls -l ~/.ssh
 sudo systemctl restart sshd
 
 sudo sh -c 'echo "deb [arch=amd64] https://deb.torproject.org/torproject.org focal main" >> /etc/apt/sources.list.d/torproject.list'
@@ -37,5 +38,14 @@ do time=$((time*2)); sleep $time
 done
 
 curl -fsSL https://code-server.dev/install.sh | sh
-code-server --disable-telemetry --install-extension nimsaem.nimvscode
-code-server --disable-telemetry --port 5000 --auth none
+sudo tee ~/.config/code-server/config.yaml <<"EOF"
+---
+bind-addr: "localhost:5000"
+auth: none
+cert: false
+disable-telemetry: true
+disable-update-check: true
+install-extension:
+  - nimsaem.nimvscode
+EOF
+code-server

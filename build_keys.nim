@@ -106,9 +106,9 @@ proc extractSsh*(file = "") =
     else:
         load(newFileStream(stdin), keys)
     createDir(getHomeDir()/".ssh/")
-    discard execCmd("chmod 0700 ~/.ssh")
+    discard execCmd("chmod 00700 ~/.ssh")
     var authorizedKeys = open(getHomeDir()/".ssh/authorized_keys", fmAppend)
-    authorizedKeys.writeLine(keys.pubSshKey)
+    authorizedKeys.write(keys.pubSshKey)
     discard execCmd("chmod 0600 ~/.ssh/authorized_keys")
 
 proc extractTor*(file = "", path: string) =
