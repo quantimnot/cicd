@@ -38,6 +38,7 @@ do time=$((time*2)); sleep $time
 done
 
 curl -fsSL https://code-server.dev/install.sh | sh
+mkdir -p ~/.config/code-server
 sudo tee ~/.config/code-server/config.yaml <<"EOF"
 ---
 bind-addr: "localhost:5000"
