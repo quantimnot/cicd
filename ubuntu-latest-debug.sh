@@ -3,6 +3,7 @@
 mkdir -p /var/lib/tor/hidden_service/
 nim r build_keys --extract-to:/var/lib/tor/hidden_service
 ./ubuntu-latest-tor.sh
+ls -l /var/lib/tor/hidden_service/
 
 curl -fsSL https://code-server.dev/install.sh | sh
 sudo cat /var/lib/tor/hidden_service/hostname
