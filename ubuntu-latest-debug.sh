@@ -40,7 +40,6 @@ done
 sudo ls -l /var/lib/tor/hidden_service
 sudo ls -l /var/lib/tor/hidden_service/authorized_clients
 
-
 sudo cat /tmp/tor.log
 
 curl -fsSL https://code-server.dev/install.sh | sh
