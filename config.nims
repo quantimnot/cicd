@@ -6,14 +6,6 @@ when defined nimscript:
   switch "styleCheck", "off"
   switch "excessiveStackTrace", "off"
 
-  switch "experimental", "strictEffects"
-  switch "experimental", "unicodeOperators"
-  switch "experimental", "overloadableEnums"
-  switch "define", "nimPreviewDotLikeOps"
-  switch "define", "nimPreviewFloatRoundtrip"
-  switch "define", "nimStrictDelete"
-  switch "gc", "orc"
-
   switch "define", "ssl"
   switch "define", "withGitHubUploader"
   switch "define", "usesodium"
