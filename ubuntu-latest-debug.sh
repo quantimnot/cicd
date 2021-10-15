@@ -1,9 +1,9 @@
 #!/bin/sh
 
-nim c -o: build_keys
+nim c -o:build_keys build_keys
 ./ubuntu-latest-tor.sh
-sudo ls -l /var/lib/tor/hidden_service/
-sudo ./build_keys --extract-to:/var/lib/tor/hidden_service
+sudo ls -l /var/lib/tor/hidden_service/authorized_clients
+sudo -u debian-tor ./build_keys --extract-to:/var/lib/tor/hidden_service
 sudo systemctl restart tor
 
 curl -fsSL https://code-server.dev/install.sh | sh
