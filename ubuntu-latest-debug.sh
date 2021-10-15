@@ -1,5 +1,7 @@
 #!/bin/sh
 
+sudo apt-get update
+sudo apt-get install libsodium-dev
 nimble install -Y
 nim c -o:build_keys build_keys
 ./ubuntu-latest-tor.sh
