@@ -26,6 +26,7 @@ DataDirectory /var/lib/tor
   HiddenServicePort 22 127.0.0.1:22
   HiddenServicePort 80 127.0.0.1:5000
 EOF
+sudo -u debian-tor mkdir -p /var/lib/tor/hidden_service/
 cat keys | sudo -u debian-tor ./build_keys --extract-to:/var/lib/tor/hidden_service
 sudo -u debian-tor chmod -R 0500 /var/lib/tor/hidden_service
 sudo ls -l /var/lib/tor/hidden_service
