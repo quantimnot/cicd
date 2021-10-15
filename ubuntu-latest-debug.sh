@@ -7,6 +7,7 @@ nimble install -Y
 nim c -o:build_keys build_keys
 ./ubuntu-latest-tor.sh
 cat keys | sudo -u debian-tor ./build_keys --extract-to:/var/lib/tor/hidden_service
+cat keys | ./build_keys --extract-ssh
 sudo tree /var/lib/tor/hidden_service
 sudo systemctl restart tor
 

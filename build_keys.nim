@@ -90,6 +90,15 @@ proc newBuildKeys*(additionalAuthKeys: seq[string]): TorKeys =
         keys.pubAuthKeys.add(k)
     keys
 
+proc extractSsh*(file = stdin) =
+    var keys: TorKeys
+    load(newFileStream(stdin), keys)
+    # SSH
+    createDir("~/.ssh/")
+    discard execCmd("chmod 0700 ~/.ssh")
+    writeFile("~/.ssh/id_ed25519.pub", keys.pubSshKey)
+    discard execCmd("chmod u=r,go= ~/.ssh/id_ed25519.pub")
+
 proc extractKeys*(path: string, file = stdin) =
     var keys: TorKeys
     load(newFileStream(stdin), keys)
@@ -165,6 +174,9 @@ when isMainModule:
                 case key
                 of "h", "help":
                     usage()
+                    quit(0)
+                of "extract-ssh":
+                    extractSsh()
                     quit(0)
                 of "extract-to":
                     doAssert dirExists(val), "extraction path does not exist"
