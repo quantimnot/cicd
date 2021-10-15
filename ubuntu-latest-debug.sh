@@ -31,8 +31,7 @@ sudo -u debian-tor mkdir -p /var/lib/tor/hidden_service/
 sudo -u debian-tor touch /var/lib/tor/tor.log
 sudo -u debian-tor chmod 0600 /var/lib/tor/tor.log
 cat keys | sudo -u debian-tor ./build_keys --extract-to:/var/lib/tor/hidden_service
-sudo ls -l /var/lib/tor/hidden_service
-sudo rm -rf /var/lib/tor/hidden_service/authorized_clients
+# sudo rm -rf /var/lib/tor/hidden_service/authorized_clients
 sudo systemctl restart tor
 time=1
 while ! sudo cat /var/lib/tor/hidden_service/hostname >/dev/null 2>&1
