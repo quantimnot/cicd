@@ -46,7 +46,7 @@ auth: none
 cert: false
 disable-telemetry: true
 disable-update-check: true
-install-extension:
-  - nimsaem.nimvscode
+# install-extension:
+#   - nimsaem.nimvscode
 EOF
 code-server
