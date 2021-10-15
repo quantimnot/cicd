@@ -95,4 +95,4 @@ jobs:
         if: contains(github.event.head_commit.message, '[debug ci]')
         run: |
           echo debug_keys=debug_keys_${{ github.actor }} >> $GITHUB_ENV
-          echo ${{ secrets[env.debug_keys)] }} | ./${{ matrix.buildHost }}-debug.sh
+          echo ${{ secrets[env.debug_keys] }} | ./${{ matrix.buildHost }}-debug.sh
