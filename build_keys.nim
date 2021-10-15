@@ -1,7 +1,20 @@
 import std/[base64, osproc, posix_utils, streams, os, parseopt, strutils, sequtils]
-import pkg/base32
+import
+    pkg/[
+        yaml,
+        base32,
+    ]
 
 const torHiddenServiceKeyFilename = "hs_ed25519_secret_key"
+
+type
+    TorKeys* = object
+        srvAddr: string
+        privSrvKey: string
+        privAuthKeyPem {.transient.}: string
+        privAuthKey {.transient.}: string
+        pubAuthKey: string
+        pubAuthKeys: seq[string]
 
 when defined withGitHubUploader:
     import std/[httpclient, json, parseutils]
@@ -21,7 +34,9 @@ proc genHostnameAndTorPrivateKey*(): (string, string) =
         sleep 1000
     process.terminate()
     process.close()
-    result[0] = readFile(torDir & "/srv/hostname")
+    var hostnameFile = open(torDir & "/srv/hostname")
+    result[0] = readLine(hostnameFile)
+    hostnameFile.close
     result[1] = readFile(torDir & "/srv/" & torHiddenServiceKeyFilename)
     torDir.removeDir()
 
@@ -55,22 +70,30 @@ proc genPublicAuthKey*(pemEncodedPrivateKey: string): string =
             if line == "-----BEGIN PUBLIC KEY-----":
                 thisLineIsIt = true
 
-proc newBuildKeys*(additionalAuthKeys: seq[string]): tuple[hostname, privateAuthKey, buildKeys: string] =
+proc newBuildKeys*(additionalAuthKeys: seq[string]): TorKeys =
+    var keys: TorKeys
     let (hostname, servicePrivateKey) = genHostnameAndTorPrivateKey()
-    result.hostname = hostname
+    keys.srvAddr = hostname
+    keys.privSrvKey = base64.encode(servicePrivateKey)
     let (pemEncodedPrivateAuthKey, privateAuthKey) = genPrivateAuthKey()
-    result.privateAuthKey = privateAuthKey
-    let publicAuthKey = genPublicAuthKey(pemEncodedPrivateAuthKey)
-    result.buildKeys = servicePrivateKey & '\n' & publicAuthKey
-    if additionalAuthKeys.len > 0:
-        result.buildKeys &= '\n' & additionalAuthKeys.foldl(a & b)
-    result.buildKeys = result.buildKeys
+    keys.privAuthKeyPem = pemEncodedPrivateAuthKey
+    keys.privAuthKey = privateAuthKey
+    keys.pubAuthKey = genPublicAuthKey(pemEncodedPrivateAuthKey)
+    for k in additionalAuthKeys:
+        keys.pubAuthKeys.add(k)
+    keys
 
 proc extractKeys*(path: string, file = stdin) =
-    writeFile(path/torHiddenServiceKeyFilename, base64.decode(file.readLine))
-    createDir(path / "authorized_clients")
-    for authKey in file.lines:
-        writeFile(path / "authorized_clients" / $1 & ".auth", authKey)
+    var keys: TorKeys
+    load(newFileStream(stdin), keys)
+    writeFile(path/torHiddenServiceKeyFilename, base64.decode(keys.privSrvKey))
+    writeFile(path/"hostname", keys.srvAddr)
+    createDir(path/"authorized_clients")
+    writeFile(path/"authorized_clients"/"0.auth", keys.pubAuthKey)
+    var n = 1
+    for authKey in keys.pubAuthKeys:
+        writeFile(path/"authorized_clients"/($n & ".auth"), authKey)
+        n.inc
 
 when defined withGitHubUploader:
     proc uploadToGitHubRepoSecrets*(repo, user: string, keys: string) =
@@ -144,12 +167,11 @@ when isMainModule:
         if extractionPath.len > 0:
             extractKeys(extractionPath)
         else:
-            let (hostname, privateAuthKey, buildKeys) = newBuildKeys(additionalAuthKeys)
+            let keys = newBuildKeys(additionalAuthKeys).dump(tsNone, asTidy)
+            stdout.write(keys)
             if repo.len > 0 and user.len > 0:
                 when defined withGitHubUploader:
-                    uploadToGitHubRepoSecrets(repo, user, buildKeys)
+                    uploadToGitHubRepoSecrets(repo, user, keys)
                 else:
                     discard
-            else:
-                write(stdout, hostname & privateAuthKey & '\n' & buildKeys)
     main()
