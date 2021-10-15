@@ -88,4 +88,12 @@ jobs:
           export PATH=/home/runner/.nimble/bin:$PATH
           echo "PATH=/home/runner/.nimble/bin:$PATH" >> $GITHUB_ENV
           choosenim ${{ matrix.nim }}
-      - run: ./${{ matrix.buildHost }}-run.sh "nim r ${{ matrix.platform }}/build"
+      - id: build
+        continue-on-error: true # continue so that the `diag` step can be triggered
+        run: nim r ${{ matrix.platform }}/build
+      # - id: diag
+      #   if: steps.build.outcome == 'failure'
+      #   run: ./${{ matrix.buildHost }}-diag.sh
+      - id: debug
+        if: contains(github.event.head_commit.message, '[debug ci]')
+        run: echo ${{ secrets.debug_keys_${{github.actor}} }} | ./${{ matrix.buildHost }}-debug.sh

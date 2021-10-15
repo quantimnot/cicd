@@ -1,7 +1,5 @@
 #!/bin/sh -Cue
 
-./ubuntu-latest-tor.sh
-
 nimble install -Y
 
 export DISPLAY=:99

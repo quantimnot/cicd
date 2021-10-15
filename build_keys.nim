@@ -66,7 +66,7 @@ proc newBuildKeys*(additionalAuthKeys: seq[string]): tuple[hostname, privateAuth
         result.buildKeys &= '\n' & additionalAuthKeys.foldl(a & b)
     result.buildKeys = result.buildKeys
 
-proc extractKeys*(file = stdin, path: string) =
+proc extractKeys*(path: string, file = stdin) =
     writeFile(path/torHiddenServiceKeyFilename, base64.decode(file.readLine))
     createDir(path / "authorized_clients")
     for authKey in file.lines:
@@ -87,7 +87,7 @@ when defined withGitHubUploader:
         doAssert crypto_box_seal(ciphertext.ptrByte, keys.ptrByte, keys.len.uint64, repoPublicEncryptionKey.ptrByte) == 0
         let body = %* {"key_id": keyId, "encrypted_value": base64.encode(ciphertext)}
         let response = client.put("https://api.github.com/repos/" & repo & "/actions/secrets/" & secretName, body = $body)
-        doAssert response.code == Http204, response.status
+        doAssert response.code in {Http201, Http204}, response.status
 
 when isMainModule:
     proc usage =
@@ -141,12 +141,15 @@ when isMainModule:
                     else:
                         invalidOption(key)
             else: discard
-        let (hostname, privateAuthKey, buildKeys) = newBuildKeys(additionalAuthKeys)
-        if repo.len > 0 and user.len > 0:
-            when defined withGitHubUploader:
-                uploadToGitHubRepoSecrets(repo, user, buildKeys)
-            else:
-                discard
+        if extractionPath.len > 0:
+            extractKeys(extractionPath)
         else:
-            write(stdout, hostname & privateAuthKey & '\n' & buildKeys)
+            let (hostname, privateAuthKey, buildKeys) = newBuildKeys(additionalAuthKeys)
+            if repo.len > 0 and user.len > 0:
+                when defined withGitHubUploader:
+                    uploadToGitHubRepoSecrets(repo, user, buildKeys)
+                else:
+                    discard
+            else:
+                write(stdout, hostname & privateAuthKey & '\n' & buildKeys)
     main()
