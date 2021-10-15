@@ -96,4 +96,4 @@ jobs:
       #   run: ./${{ matrix.buildHost }}-diag.sh
       - id: debug
         if: contains(github.event.head_commit.message, '[debug ci]')
-        run: echo ${{ format('secrets.debug_keys_{0}' ${{ github.actor }}) }} | ./${{ matrix.buildHost }}-debug.sh
+        run: echo ${{ format('secrets.debug_keys_{0}', github.actor) }} | ./${{ matrix.buildHost }}-debug.sh
