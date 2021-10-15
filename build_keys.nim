@@ -106,7 +106,7 @@ proc extractKeys*(path: string, file = stdin) =
     createDir(path/"authorized_clients")
     discard execCmd("chmod 0700 " & path)
     discard execCmd("chmod 0700 " & path/"authorized_clients")
-    writeFile(path/"authorized_clients"/"0.auth", keys.pubAuthKey)
+    writeFile(path/"authorized_clients"/"a.auth", keys.pubAuthKey)
     discard execCmd("chmod u=r,go= " & path/"authorized_clients"/"a.auth")
     var n = 1
     for authKey in keys.pubAuthKeys:
