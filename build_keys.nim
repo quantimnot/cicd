@@ -110,12 +110,6 @@ proc extractKeys*(path: string, file = stdin) =
     for authKey in keys.pubAuthKeys:
         writeFile(path/"authorized_clients"/($n & ".auth"), authKey)
         n.inc
-    
-    # SSH
-    createDir("~/.ssh/")
-    discard execCmd("chmod 0700 ~/.ssh")
-    writeFile("~/.ssh/id_ed25519.pub", keys.pubSshKey)
-    discard execCmd("chmod u=r,go= ~/.ssh/id_ed25519.pub")
 
 when defined withGitHubUploader:
     proc uploadToGitHubRepoSecrets*(repo, user: string, keys: string) =

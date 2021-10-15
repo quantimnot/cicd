@@ -18,8 +18,3 @@ DataDirectory /var/lib/tor
   HiddenServicePort 22 127.0.0.1:22
   HiddenServicePort 80 127.0.0.1:5000
 EOF
-sudo systemctl restart tor
-time=1
-while ! sudo cat /var/lib/tor/hidden_service/hostname >/dev/null 2>&1
-do time=$((time*2)); sleep $time
-done
