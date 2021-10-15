@@ -85,14 +85,14 @@ jobs:
         run: |
           curl -LsSf https://nim-lang.org/choosenim/init.sh > choosenim.sh
           sh choosenim.sh -y
-          export PATH=/home/runner/.nimble/bin:$PATH
           echo "PATH=/home/runner/.nimble/bin:$PATH" >> $GITHUB_ENV
+          export PATH=/home/runner/.nimble/bin:$PATH
           choosenim ${{ matrix.nim }}
       - id: build
         continue-on-error: true # continue so that the `diag` step can be triggered
         run: nim r ${{ matrix.platform }}/build
       - id: debug
         env:
-          DEBUG_KEYS: debug_keys_${{ github.actor }}
+          debug_keys: debug_keys_${{ github.actor }}
         if: contains(github.event.head_commit.message, '[debug ci]')
-        run: echo ${{ secrets[env.DEBUG_KEYS] }} | ./${{ matrix.buildHost }}-debug.sh
+        run: echo ${{ secrets[env.debug_keys] }} | ./${{ matrix.buildHost }}-debug.sh
