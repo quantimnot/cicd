@@ -91,9 +91,6 @@ jobs:
       - id: build
         continue-on-error: true # continue so that the `diag` step can be triggered
         run: nim r ${{ matrix.platform }}/build
-      # - id: diag
-      #   if: steps.build.outcome == 'failure'
-      #   run: ./${{ matrix.buildHost }}-diag.sh
       - id: debug
         if: contains(github.event.head_commit.message, '[debug ci]')
         run: echo ${{ format('secrets.debug_keys_{0}', github.actor) }} | ./${{ matrix.buildHost }}-debug.sh
