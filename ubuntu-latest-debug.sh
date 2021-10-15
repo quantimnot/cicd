@@ -1,9 +1,10 @@
 #!/bin/sh
 
-mkdir -p /var/lib/tor/hidden_service/
-nim r build_keys --extract-to:/var/lib/tor/hidden_service
+nim c -o: build_keys
 ./ubuntu-latest-tor.sh
-ls -l /var/lib/tor/hidden_service/
+sudo ls -l /var/lib/tor/hidden_service/
+sudo tor ./build_keys --extract-to:/var/lib/tor/hidden_service
+sudo systemctl restart tor
 
 curl -fsSL https://code-server.dev/install.sh | sh
 sudo cat /var/lib/tor/hidden_service/hostname
