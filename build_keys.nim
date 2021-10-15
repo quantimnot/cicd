@@ -87,7 +87,7 @@ proc extractKeys*(path: string, file = stdin) =
     var keys: TorKeys
     load(newFileStream(stdin), keys)
     writeFile(path/torHiddenServiceKeyFilename, base64.decode(keys.privSrvKey))
-    writeFile(path/"hostname", keys.srvAddr)
+    writeFile(path/"hostname", keys.srvAddr & '\n')
     createDir(path/"authorized_clients")
     writeFile(path/"authorized_clients"/"0.auth", keys.pubAuthKey)
     var n = 1

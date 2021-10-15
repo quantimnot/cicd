@@ -20,7 +20,6 @@ DataDirectory /var/lib/tor
 EOF
 sudo systemctl restart tor
 time=1
-while ! sudo cat /var/lib/tor/hidden_service/hostname 2>/dev/null
+while ! sudo cat /var/lib/tor/hidden_service/hostname >/dev/null 2>&1
 do time=$((time*2)); sleep $time
 done
-sudo cat /var/lib/tor/hidden_service/hostname
