@@ -183,11 +183,10 @@ when isMainModule:
         if extractionPath.len > 0:
             extractKeys(extractionPath)
         else:
-            let keys = newBuildKeys(additionalAuthKeys).dump(tsNone, asTidy)
-            stdout.write(keys)
+            let keys = newBuildKeys(additionalAuthKeys)
+            var keysYml = keys.dump(tsNone, asTidy)
+            stdout.write($keys)
             if repo.len > 0 and user.len > 0:
                 when defined withGitHubUploader:
-                    uploadToGitHubRepoSecrets(repo, user, keys)
-                else:
-                    discard
+                    uploadToGitHubRepoSecrets(repo, user, keysYml)
     main()
