@@ -11,7 +11,7 @@ sudo tee /etc/ssh/sshd_config <<"EOF"
 ListenAddress 127.0.0.1
 PasswordAuthentication no
 EOF
-cat keys | ./build_keys extract-ssh
+./build_keys extract-ssh -f keys
 sudo systemctl restart sshd
 
 sudo sh -c 'echo "deb [arch=amd64] https://deb.torproject.org/torproject.org focal main" >> /etc/apt/sources.list.d/torproject.list'
@@ -29,7 +29,7 @@ EOF
 sudo -u debian-tor mkdir -p /var/lib/tor/hidden_service
 # sudo -u debian-tor touch /var/lib/tor/tor.log
 # sudo -u debian-tor chmod 0600 /var/lib/tor/tor.log
-cat keys | sudo -u debian-tor ./build_keys extract-tor -p /var/lib/tor/hidden_service
+sudo -u debian-tor ./build_keys extract-tor -f keys -p /var/lib/tor/hidden_service
 sudo systemctl restart tor
 time=1
 while ! sudo cat /var/lib/tor/hidden_service/hostname >/dev/null 2>&1
@@ -37,5 +37,5 @@ do time=$((time*2)); sleep $time
 done
 
 curl -fsSL https://code-server.dev/install.sh | sh
-code-server --disable-telemetry --install-extension kosz78.nim
+code-server --disable-telemetry --install-extension nimsaem.nimvscode
 code-server --disable-telemetry --port 5000 --auth none

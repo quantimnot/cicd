@@ -105,7 +105,6 @@ proc extractSsh*(file = "") =
         load(newFileStream(file), keys)
     else:
         load(newFileStream(stdin), keys)
-    load(newFileStream(stdin), keys)
     createDir(getHomeDir()/".ssh/")
     discard execCmd("chmod 0700 ~/.ssh")
     var authorizedKeys = open(getHomeDir()/".ssh/authorized_keys", fmAppend)
