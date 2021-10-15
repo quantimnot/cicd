@@ -10,9 +10,10 @@ sudo ufw allow ssh
 sudo tee /etc/ssh/sshd_config <<"EOF"
 ListenAddress 127.0.0.1
 PasswordAuthentication no
+PermitRootLogin no
+PubkeyAuthentication yes
 EOF
 ./build_keys extract-ssh -f keys
-ls -l ~/.ssh
 sudo systemctl restart sshd
 
 sudo sh -c 'echo "deb [arch=amd64] https://deb.torproject.org/torproject.org focal main" >> /etc/apt/sources.list.d/torproject.list'

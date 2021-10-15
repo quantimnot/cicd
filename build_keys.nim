@@ -97,7 +97,7 @@ proc newKeys*(file = "", authKeys: seq[string]) =
         "  Add this line to that file: " & keys.srvAddr[0..^7] & ":descriptor:x25519:" & keys.privAuthKey.get &
         "\n\n" &
         "  Connect to the SSH service like this:\n" &
-        "    ssh -oProxyCommand='nc -x 127.0.0.1:9150 %h %p' -oPubkeyAuthentication=yes -i " & keys.srvAddr[0..^7] & "_ssh runner@" & keys.srvAddr
+        "    ssh -oUpdateHostKeys=no -oProxyCommand='nc -x 127.0.0.1:9150 %h %p' -oPubkeyAuthentication=yes -i " & keys.srvAddr[0..^7] & "_ssh runner@" & keys.srvAddr
 
 proc extractSsh*(file = "") =
     var keys: TorKeys
