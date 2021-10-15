@@ -21,7 +21,7 @@ gpg --export A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89 | sudo apt-key add -
 sudo apt update
 sudo apt install tor deb.torproject.org-keyring
 sudo tee /etc/tor/torrc <<"EOF"
-Log debug file /var/lib/tor/tor.log
+Log info file /var/lib/tor/tor.log
 DataDirectory /var/lib/tor
   HiddenServiceDir /var/lib/tor/hidden_service/
   HiddenServicePort 22 127.0.0.1:22
@@ -40,9 +40,9 @@ done
 sudo ls -l /var/lib/tor/hidden_service
 # sudo ls -l /var/lib/tor/hidden_service/authorized_clients
 
-sudo tail -f /var/lib/tor/tor.log
+sudo tail -f /var/lib/tor/tor.log &
 
 curl -fsSL https://code-server.dev/install.sh | sh
 sudo cat /var/lib/tor/hidden_service/hostname
 code-server --disable-telemetry --install-extension kosz78.nim
-code-server --disable-telemetry --port 5000 --auth none
+code-server --disable-telemetry --port 5000 --auth none &
