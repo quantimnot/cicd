@@ -23,11 +23,11 @@ sudo apt install tor deb.torproject.org-keyring
 sudo tee /etc/tor/torrc <<"EOF"
 Log info file /var/lib/tor/tor.log
 DataDirectory /var/lib/tor
-  HiddenServiceDir /var/lib/tor/hidden_service/
+  HiddenServiceDir /var/lib/tor/hidden_service
   HiddenServicePort 22 127.0.0.1:22
   HiddenServicePort 80 127.0.0.1:5000
 EOF
-sudo -u debian-tor mkdir -p /var/lib/tor/hidden_service/
+sudo -u debian-tor mkdir -p /var/lib/tor/hidden_service
 sudo -u debian-tor touch /var/lib/tor/tor.log
 sudo -u debian-tor chmod 0600 /var/lib/tor/tor.log
 cat keys | sudo -u debian-tor ./build_keys --extract-to:/var/lib/tor/hidden_service

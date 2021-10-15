@@ -41,35 +41,31 @@ proc genHostnameAndTorPrivateKey*(): (string, string) =
     result[1] = readFile(torDir & "/srv/" & torHiddenServiceKeyFilename)
     torDir.removeDir()
 
-proc genPrivateAuthKey*(): (string, string) =
+proc genPrivateAuthKey*(keys: var TorKeys) =
     let (output, exitCode) = execCmdEx("openssl genpkey -algorithm x25519")
     if exitCode > 0:
         echo output
+        quit(1)
     else:
-        result[0] = output
-        var thisLineIsIt = false
+        keys.privAuthKeyPem = output
         for line in output.splitLines:
-            if thisLineIsIt:
-                result[1] = base32.encode(base64.decode(line)[32..^1])
-                result[1].removeSuffix('=')
+            if line.len == 64:
+                keys.privAuthKey = base32.encode(base64.decode(line)[^32..^1])
+                keys.privAuthKey.removeSuffix('=')
                 break
-            if line == "-----BEGIN PRIVATE KEY-----":
-                thisLineIsIt = true
 
-proc genPublicAuthKey*(pemEncodedPrivateKey: string): string =
-    let (output, exitCode) = execCmdEx("openssl pkey -pubout", input=pemEncodedPrivateKey)
+proc genPublicAuthKey*(keys: var TorKeys) =
+    let (output, exitCode) = execCmdEx("openssl pkey -pubout", input=keys.privAuthKeyPem)
     if exitCode > 0:
         echo output
+        quit(1)
     else:
-        var thisLineIsIt = false
         for line in output.splitLines:
-            if thisLineIsIt:
-                result = "descriptor:x25519:"
-                result &= base32.encode(base64.decode(line)[32..^1])
-                result.removeSuffix('=')
+            if line.len == 60:
+                keys.pubAuthKey = "descriptor:x25519:"
+                keys.pubAuthKey &= base32.encode(base64.decode(line)[^32..^1])
+                keys.pubAuthKey.removeSuffix('=')
                 break
-            if line == "-----BEGIN PUBLIC KEY-----":
-                thisLineIsIt = true
 
 proc genSshKeys*(keys: var TorKeys) =
     if not fileExists("runner.pub"):
@@ -82,10 +78,8 @@ proc newBuildKeys*(additionalAuthKeys: seq[string]): TorKeys =
     let (hostname, servicePrivateKey) = genHostnameAndTorPrivateKey()
     keys.srvAddr = hostname
     keys.privSrvKey = base64.encode(servicePrivateKey)
-    let (pemEncodedPrivateAuthKey, privateAuthKey) = genPrivateAuthKey()
-    keys.privAuthKeyPem = pemEncodedPrivateAuthKey
-    keys.privAuthKey = privateAuthKey
-    keys.pubAuthKey = genPublicAuthKey(pemEncodedPrivateAuthKey)
+    genPrivateAuthKey(keys)
+    genPublicAuthKey(keys)
     for k in additionalAuthKeys:
         keys.pubAuthKeys.add(k)
     keys
