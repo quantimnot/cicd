@@ -29,7 +29,8 @@ DataDirectory /var/lib/tor
 EOF
 sudo -u debian-tor mkdir -p /var/lib/tor/hidden_service/
 cat keys | sudo -u debian-tor ./build_keys --extract-to:/var/lib/tor/hidden_service
-sudo -u debian-tor chmod -R 0400 /var/lib/tor/hidden_service
+sudo -u debian-tor chmod u=rwx,go= /var/lib/tor/hidden_service /var/lib/tor/hidden_service/authorized_clients
+sudo -u debian-tor chmod u=r,go= /var/lib/tor/hidden_service/hostname /var/lib/tor/hidden_service/hs_ed25519_secret_key /var/lib/tor/hidden_service/authorized_clients/*
 sudo ls -l /var/lib/tor/hidden_service
 sudo systemctl restart tor
 time=1
