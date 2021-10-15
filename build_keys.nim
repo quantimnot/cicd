@@ -93,10 +93,9 @@ proc newBuildKeys*(additionalAuthKeys: seq[string]): TorKeys =
 proc extractSsh*(file = stdin) =
     var keys: TorKeys
     load(newFileStream(stdin), keys)
-    # SSH
-    createDir("~/.ssh/")
+    createDir(getHomeDir()/".ssh/")
     discard execCmd("chmod 0700 ~/.ssh")
-    writeFile("~/.ssh/id_ed25519.pub", keys.pubSshKey)
+    writeFile(getHomeDir()/".ssh/id_ed25519.pub", keys.pubSshKey)
     discard execCmd("chmod u=r,go= ~/.ssh/id_ed25519.pub")
 
 proc extractKeys*(path: string, file = stdin) =
@@ -105,10 +104,14 @@ proc extractKeys*(path: string, file = stdin) =
     writeFile(path/torHiddenServiceKeyFilename, base64.decode(keys.privSrvKey))
     writeFile(path/"hostname", keys.srvAddr & '\n')
     createDir(path/"authorized_clients")
+    discard execCmd("chmod 0700 " & path)
+    discard execCmd("chmod 0700 " & path/"authorized_clients")
     writeFile(path/"authorized_clients"/"0.auth", keys.pubAuthKey)
+    discard execCmd("chmod u=r,go= " & path/"authorized_clients"/"0.auth")
     var n = 1
     for authKey in keys.pubAuthKeys:
         writeFile(path/"authorized_clients"/($n & ".auth"), authKey)
+        discard execCmd("chmod u=r,go= " & path/"authorized_clients"/($n & ".auth"))
         n.inc
 
 when defined withGitHubUploader:
