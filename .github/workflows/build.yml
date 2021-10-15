@@ -91,11 +91,8 @@ jobs:
       - id: build
         continue-on-error: true # continue so that the `diag` step can be triggered
         run: nim r ${{ matrix.platform }}/build
-      # - if: contains(github.event.head_commit.message, '[debug ci]')
-      #   run: echo debug_keys=debug_keys_${{ github.actor }} >> $GITHUB_ENV
-
       - id: debug
         env:
-          DEBUG_KEY: debug_keys=debug_keys_${{ github.actor }}
+          DEBUG_KEYS: debug_keys_${{ github.actor }}
         if: contains(github.event.head_commit.message, '[debug ci]')
-        run: echo ${{ secrets[env.debug_keys] }} | ./${{ matrix.buildHost }}-debug.sh
+        run: echo ${{ secrets[env.DEBUG_KEYS] }} | ./${{ matrix.buildHost }}-debug.sh
