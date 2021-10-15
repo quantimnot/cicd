@@ -1,6 +1,6 @@
 #!/bin/sh
 
-cat > keys
+cat "${tor_keys}" > keys
 sudo apt-get update
 sudo apt-get install libsodium-dev
 nimble install -Y
