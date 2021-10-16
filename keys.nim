@@ -1,4 +1,4 @@
-import std/[base64, osproc, posix_utils, streams, os, strutils, math]
+import std/[base64, osproc, endians, streams, os, strutils, math, httpclient, json]
 import
     pkg/[
         yaml,
@@ -17,7 +17,6 @@ type
         pubSshKeys: seq[string]
         pubAuthKeys: seq[string]
 
-import std/[httpclient, json, parseutils]
 {.passL: "-lsodium"}
 let crypto_pwhash_ALG_ARGON2ID13 {.importc: "crypto_pwhash_ALG_ARGON2ID13", header: "<sodium.h>".}: cint
 let crypto_sign_SEEDBYTES {.importc: "crypto_sign_SEEDBYTES", header: "<sodium.h>".}: culonglong
@@ -97,7 +96,7 @@ proc privX25519*(privEd25519 = ""): string =
                 stderr.writeLine "error: private ed25519 key size must be " & $crypto_sign_ed25519_SECRETKEYBYTES & " bytes"
                 quit 1
         result = newString(crypto_sign_ed25519_SECRETKEYBYTES)
-        doAssert crypto_sign_ed25519_sk_to_pk(result.ptrByte, privEd25519.ptrByte) == 0
+        doAssert crypto_sign_ed25519_sk_to_curve25519(result.ptrByte, privEd25519.ptrByte) == 0
         result = base32.encode(result)
         result.removeSuffix '='
 
@@ -112,7 +111,7 @@ proc pubX25519*(pubEd25519 = ""): string =
                 stderr.writeLine "error: public ed25519 key size must be " & $crypto_sign_ed25519_PUBLICKEYBYTES & " bytes"
                 quit 1
         result = newString(crypto_sign_ed25519_PUBLICKEYBYTES)
-        doAssert crypto_sign_ed25519_sk_to_pk(result.ptrByte, pubEd25519.ptrByte) == 0
+        doAssert crypto_sign_ed25519_pk_to_curve25519(result.ptrByte, pubEd25519.ptrByte) == 0
         result = "descriptor:x25519:" & base32.encode(result)
         result.removeSuffix '='
 
@@ -126,9 +125,16 @@ proc privSsh*(privEd25519 = "", pubEd25519 = "", comment = ""): string =
             else:
                 stderr.writeLine "error: private ed25519 key size must be " & $crypto_sign_ed25519_SECRETKEYBYTES & " bytes"
                 quit 1
+        func privSectLen(): int =
+            8 + 4 + 11 + 4 + 32 + 4 + 64 + 4 + comment.len
+        func padLen(): int =
+            privSectLen() mod 8
         func padding(): string =
-            for n in 0..((8 + 11 + 32 + 64 + comment.len) mod 8)-1:
+            for n in 1..padLen():
                 result &= cast[char](n)
+        func i2s(i: int): string =
+            result = newString 4
+            (result[0]).addr.bigEndian32 i.unsafeAddr
         proc opensshKey(): string =
             result = "openssh-key-v1" & '\x00' &    # NULL-terminated "Auth Magic" string
             "\x00\x00\x00\x04" & "none" &           # ciphername length and string
@@ -138,20 +144,21 @@ proc privSsh*(privEd25519 = "", pubEd25519 = "", comment = ""): string =
             "\x00\x00\x00\x33" &                    # public key length in ssh format
             "\x00\x00\x00\x0b" & "ssh-ed25519" &    # key type
             "\x00\x00\x00\x20" & pubEd25519 &       # public key
-            "\x00\x00\x00\x0b" &                    # remaining length
-            "<pÜÅ<pÜÅ" &                            # random 64 bits
+            (privSectLen() + padLen()).i2s &        # remaining length
+            "\x00\x00\x00\x00\x00\x00\x00\x00" &    # random 64 bits
             "\x00\x00\x00\x0b" & "ssh-ed25519" &    # key type
             "\x00\x00\x00\x20" & pubEd25519 &       # public key
             "\x00\x00\x00\x40" & privEd25519 &      # private key
-            comment.len.intToStr(4) & comment &     # comment
+            comment.len.i2s & comment &             # comment
             padding()                               # pad to block size
             result = base64.encode(result)
             for n in 1..floorDiv(result.len, 70):
-                result.insert("\n", n * 70)
+                result.insert("\n", (n * 70) + (n-1))
+            result.removeSuffix '='
         result =
             "-----BEGIN OPENSSH PRIVATE KEY-----\n" &
             opensshKey() &
-            "-----END OPENSSH PRIVATE KEY-----\n"
+            "\n-----END OPENSSH PRIVATE KEY-----\n"
 
 proc onionAddr*(pubEd25519 = ""): string =
     # from: https://gitweb.torproject.org/torspec.git/tree/address-spec.txt
