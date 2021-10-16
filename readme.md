@@ -67,7 +67,7 @@
       ed25519 private key   <- tor service id key
       x25519 public key     <- auth key
       ...                   <- additional auth keys
-    - Keys can be generated using the `build_keys` utility
+    - Keys can be generated using the `keys` utility
   - Creates a Tor ssh service.
   - Creates a Tor http service.
     - Serves build artifacts.

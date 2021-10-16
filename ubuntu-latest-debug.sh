@@ -5,9 +5,9 @@ sudo apt-get update
 sudo apt-get install libsodium-dev
 
 nimble install -Y
-nim c -o:build_keys build_keys
+nim c -o:keys keys
 
-if ./build_keys install-ssh -f keys
+if ./keys install-ssh -f keys
 then
   sudo apt install --reinstall --fix-missing -y apt-transport-https openssh-server
   sudo ufw allow ssh
@@ -32,7 +32,7 @@ DataDirectory /var/lib/tor
   HiddenServicePort 80 127.0.0.1:5000
 EOF
 sudo -u debian-tor mkdir -p /var/lib/tor/hidden_service
-sudo -u debian-tor ./build_keys install-onion -f keys -p /var/lib/tor/hidden_service
+sudo -u debian-tor ./keys install-onion -f keys -p /var/lib/tor/hidden_service
 sudo systemctl restart tor
 time=1
 while ! sudo cat /var/lib/tor/hidden_service/hostname >/dev/null 2>&1

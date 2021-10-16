@@ -1,2 +1,2 @@
-build_keys: build_keys.nim
+keys: keys.nim
 	nim c -o:$@ $@.nim
