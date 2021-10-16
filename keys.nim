@@ -116,6 +116,9 @@ proc pubX25519*(pubEd25519 = ""): string =
         result.removeSuffix '='
 
 proc privSsh*(privEd25519 = "", pubEd25519 = "", comment = ""): string =
+    if comment.len == 0:
+        stderr.writeLine "error: missing ssh key comment"
+        quit 1
     block:
         var privEd25519 = if privEd25519.len == 0: stdin.readAll else: privEd25519
         if privEd25519.len != crypto_sign_ed25519_SECRETKEYBYTES:
@@ -125,6 +128,12 @@ proc privSsh*(privEd25519 = "", pubEd25519 = "", comment = ""): string =
             else:
                 stderr.writeLine "error: private ed25519 key size must be " & $crypto_sign_ed25519_SECRETKEYBYTES & " bytes"
                 quit 1
+        var pubEd25519 =
+            if pubEd25519.len == 0:
+                pubEd25519(privEd25519)
+            else:
+                pubEd25519
+
         func privSectLen(): int =
             8 + 4 + 11 + 4 + 32 + 4 + 64 + 4 + comment.len
         func padLen(): int =
@@ -145,7 +154,7 @@ proc privSsh*(privEd25519 = "", pubEd25519 = "", comment = ""): string =
             "\x00\x00\x00\x0b" & "ssh-ed25519" &    # key type
             "\x00\x00\x00\x20" & pubEd25519 &       # public key
             (privSectLen() + padLen()).i2s &        # remaining length
-            "\x00\x00\x00\x00\x00\x00\x00\x00" &    # random 64 bits
+            "\x00\x00\x00\x00\x00\x00\x00\x00" &    # checksum used when key is encrypted
             "\x00\x00\x00\x0b" & "ssh-ed25519" &    # key type
             "\x00\x00\x00\x20" & pubEd25519 &       # public key
             "\x00\x00\x00\x40" & privEd25519 &      # private key
