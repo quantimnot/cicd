@@ -215,6 +215,14 @@ proc all*(passwd = "") =
 #     #     "  Connect to the SSH service like this:\n" &
 #     #     "    ssh -oUpdateHostKeys=no -oProxyCommand='nc -x 127.0.0.1:9150 %h %p' -oPubkeyAuthentication=yes -i " & keys.srvAddr.get[0..^7] & "_ssh runner@" & keys.srvAddr.get
 
+proc pgp*(): string =
+    # https://github.com/skeeto/passphrase2pgp
+    discard
+
+proc x509*(): string =
+    # https://github.com/ahf/onion-x509
+    discard
+
 proc installSsh*(file = "") =
     var keys: Keys
     if file.len > 0:
@@ -230,7 +238,7 @@ proc installSsh*(file = "") =
         discard execCmd("chmod 0600 ~/.ssh/authorized_keys")
     quit 2
 
-proc installTor*(file = "", path: string) =
+proc installOnion*(file = "", path: string) =
     var keys: Keys
     if file.len > 0:
         load(newFileStream(file), keys)
@@ -304,6 +312,6 @@ when isMainModule:
             "auth": "use tor authentication",
             "ssh": "enable ssh"
         }],
-        [installTor, cmdName = "install-tor", help={"file": "keys file", "path": "Extract tor service config"}],
+        [installOnion, cmdName = "install-onion", help={"file": "keys file", "path": "Extract tor service config"}],
         [installSsh, cmdName = "install-ssh", help={"file": "keys file"}],
     )

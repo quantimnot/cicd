@@ -7,6 +7,5 @@ when defined nimscript:
   switch "excessiveStackTrace", "off"
 
   switch "define", "ssl"
-  switch "define", "uploader"
   switch "define", "release"
   switch "threads", "on"

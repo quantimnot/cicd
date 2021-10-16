@@ -10,8 +10,9 @@ name: build
 # https://github.com/actions/cache
 #
 # TODO:
-# - Create a test result branch: `REPO/test-results`.
-# - Commit test outputs to the test result branch.
+#   - better caching: https://stackoverflow.com/questions/59269850/caching-apt-packages-in-github-actions-workflow
+#   - Create a test result branch: `REPO/test-results`.
+#   - Commit test outputs to the test result branch.
 # https://stackoverflow.com/questions/57921401/push-to-origin-from-github-action/58393457#58393457
 
 
