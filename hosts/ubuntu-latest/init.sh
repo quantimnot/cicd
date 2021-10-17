@@ -1,11 +1,11 @@
 #!/bin/sh -Cue
 
-echo "${tor_keys}" > keys
 sudo apt-get update
 sudo apt-get install libsodium-dev xvfb
 
 nimble install -Y
-nim c -o:keys keys
+
+make
 
 export DISPLAY=:99
 

@@ -94,6 +94,8 @@ jobs:
           export PATH=/home/runner/.nimble/bin:$PATH
           choosenim ${{ matrix.nim }}
       - id: init
+        env:
+          cicd_conf: ${{ secrets.cicd_conf }}
         run: |
           ./hosts/${{ matrix.buildHost }}/init.sh
           ./targets/${{ matrix.platform }}/${{ matrix.buildHost }}-init.sh
@@ -102,7 +104,7 @@ jobs:
         run: nim r ${{ matrix.platform }}/cicd build
       - id: debug-ci
         env:
-          debug_keys: debug_keys_${{ github.actor }}
-          tor_keys: ${{ secrets[env.debug_keys] }}
+          debug_keys_id: debug_keys_${{ github.actor }}
+          debug_keys: ${{ secrets[env.debug_keys_id] }}
         if: contains(github.event.head_commit.message, '[debug ci]')
         run: ./hosts/${{ matrix.buildHost }}/debug.sh
