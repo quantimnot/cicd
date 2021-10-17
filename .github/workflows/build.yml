@@ -93,6 +93,10 @@ jobs:
           echo "PATH=/home/runner/.nimble/bin:$PATH" >> $GITHUB_ENV
           export PATH=/home/runner/.nimble/bin:$PATH
           choosenim ${{ matrix.nim }}
+      - id: init
+        run: |
+          ./hosts/${{ matrix.buildHost }}/init.sh
+          ./targets/${{ matrix.platform }}/${{ matrix.buildHost }}-init.sh
       - id: build
         continue-on-error: true # continue so that the `debug-ci` step can be triggered
         run: nim r ${{ matrix.platform }}/cicd build
