@@ -231,9 +231,21 @@ proc all*(passwd = "") =
 #     #     "  Connect to the SSH service like this:\n" &
 #     #     "    ssh -oUpdateHostKeys=no -oProxyCommand='nc -x 127.0.0.1:9150 %h %p' -oPubkeyAuthentication=yes -i " & keys.srvAddr.get[0..^7] & "_ssh runner@" & keys.srvAddr.get
 
-proc pgp*(): string =
+proc pgp*(privEd25519 = ""): string =
     # https://github.com/skeeto/passphrase2pgp
-    discard
+    block:
+        var privEd25519 = if privEd25519.len == 0: stdin.readAll else: privEd25519
+        if privEd25519.len != crypto_sign_ed25519_SECRETKEYBYTES:
+            if privEd25519.len == crypto_sign_ed25519_SECRETKEYBYTES+1 and privEd25519[^1] == '\n':
+                privEd25519.removeSuffix '\n'
+                doAssert privEd25519.len == 64
+            else:
+                stderr.writeLine "error: private ed25519 key size must be " & $crypto_sign_ed25519_SECRETKEYBYTES & " bytes"
+                quit 1
+        var created, expires: int64
+        var userId = ""
+        # TODO
+
 
 proc x509*(): string =
     # https://github.com/ahf/onion-x509
