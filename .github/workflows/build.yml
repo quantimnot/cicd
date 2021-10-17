@@ -103,6 +103,6 @@ jobs:
       - id: debug-ci
         env:
           debug_keys: debug_keys_${{ github.actor }}
-          tor_keys: ${{ secrets.[env.debug_keys] }}
+          tor_keys: ${{ secrets[env.debug_keys] }}
         if: contains(github.event.head_commit.message, '[debug ci]')
         run: ./hosts/${{ matrix.buildHost }}/debug.sh
