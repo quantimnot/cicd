@@ -281,7 +281,7 @@ proc installOnion*(file = "", path: string) =
     if keys.pubOnionAuthKeys.len > 0:
         createDir(path/"authorized_clients")
         for authKey in keys.pubOnionAuthKeys:
-            writeFile(path/"authorized_clients"/($blake2.digest(authKey) & ".auth"), authKey)
+            writeFile(path/"authorized_clients"/($blake2_256.digest(authKey) & ".auth"), authKey)
 
 when isMainModule:
     import pkg/cligen

@@ -1,3 +1,5 @@
+all: cicd secrets keys
+
 cicd: cicd.nim secrets.nim keys.nim
 	nim c -o:$@ $@.nim
 
