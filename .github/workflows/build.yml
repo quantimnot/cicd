@@ -21,6 +21,8 @@ concurrency:
   cancel-in-progress: true
 
 on:
+  # pull_request:
+  #   types: [ assigned, opened, synchronize, reopened ]
   push:
     branches:
       - test-github-actions
@@ -72,6 +74,8 @@ jobs:
           # - devel
     steps:
       - uses: actions/checkout@v2
+        # with:
+        #   token: ${{ secrets.PAT }}
       - id: cache-nimble
         uses: actions/cache@v2
         with:
@@ -90,11 +94,11 @@ jobs:
           export PATH=/home/runner/.nimble/bin:$PATH
           choosenim ${{ matrix.nim }}
       - id: build
-        continue-on-error: true # continue so that the `diag` step can be triggered
-        run: nim r ${{ matrix.platform }}/build
-      - id: debug
+        continue-on-error: true # continue so that the `debug-ci` step can be triggered
+        run: nim r ${{ matrix.platform }}/cicd build
+      - id: debug-ci
         env:
           debug_keys: debug_keys_${{ github.actor }}
-          tor_keys: ${{ secrets.debug_keys_quantimnot }}
+          tor_keys: ${{ secrets.[env.debug_keys] }}
         if: contains(github.event.head_commit.message, '[debug ci]')
-        run: ./${{ matrix.buildHost }}-debug.sh
+        run: ./hosts/${{ matrix.buildHost }}/debug.sh

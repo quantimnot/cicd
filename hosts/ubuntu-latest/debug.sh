@@ -1,12 +1,5 @@
 #!/bin/sh
 
-echo "${tor_keys}" > keys
-sudo apt-get update
-sudo apt-get install libsodium-dev
-
-nimble install -Y
-nim c -o:keys keys
-
 if ./keys install-ssh -f keys
 then
   sudo apt install --reinstall --fix-missing -y apt-transport-https openssh-server
