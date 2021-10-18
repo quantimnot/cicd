@@ -33,7 +33,7 @@ sudo systemctl restart tor
 time=1
 while ! sudo cat /var/lib/tor/hidden_service/hostname >/dev/null 2>&1; do
 	time=$((time * 2))
-	sleep               $time
+	sleep $time
 done
 
 rm debug_keys
