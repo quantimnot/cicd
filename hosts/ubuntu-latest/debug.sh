@@ -1,19 +1,19 @@
-#!/bin/sh
+#!/bin/sh -u
 
-echo "${debug_keys}" > debug_keys
+# shellcheck disable=SC2154
+echo "${debug_keys}" >debug_keys
 unset debug_keys
 
-if ./keys install-ssh -f debug_keys
-then
-  sudo apt install --reinstall --fix-missing -y apt-transport-https openssh-server
-  sudo ufw allow ssh
-  sudo tee /etc/ssh/sshd_config <<"EOF"
+if ./keys install-ssh -f debug_keys; then
+	sudo apt install --reinstall --fix-missing -y apt-transport-https openssh-server
+	sudo ufw allow ssh
+	sudo tee /etc/ssh/sshd_config <<"EOF"
 ListenAddress 127.0.0.1
 PasswordAuthentication no
 PermitRootLogin no
 PubkeyAuthentication yes
 EOF
-  sudo systemctl restart sshd
+	sudo systemctl restart sshd
 fi
 
 sudo sh -c 'echo "deb [arch=amd64] https://deb.torproject.org/torproject.org focal main" >> /etc/apt/sources.list.d/torproject.list'
@@ -31,8 +31,9 @@ sudo -u debian-tor mkdir -p /var/lib/tor/hidden_service
 sudo -u debian-tor ./keys install-onion -f debug_keys -p /var/lib/tor/hidden_service
 sudo systemctl restart tor
 time=1
-while ! sudo cat /var/lib/tor/hidden_service/hostname >/dev/null 2>&1
-do time=$((time*2)); sleep $time
+while ! sudo cat /var/lib/tor/hidden_service/hostname >/dev/null 2>&1; do
+	time=$((time * 2))
+	sleep               $time
 done
 
 rm debug_keys

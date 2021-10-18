@@ -40,14 +40,14 @@
 |-------|------------------|
 | GH    | GitHub Releases  |
 | GHP   | GitHub Pages     |
-| CWS   | Chome Web Store  |
+| CWS   | Chrome Web Store  |
 | GP    | Google Play      |
 | GPB   | Google Play Beta |
 | AS    | Apple App Store  |
 | TF    | Apple TestFlight |
 | MS    | Microsoft Store  |
 | NIM   | Nimble           |
-| RSYNC | Rsync over SSH   |
+| RSYNC | RSYNC over SSH   |
 
 | Code  | Codesign             |
 |-------|----------------------|
@@ -60,36 +60,42 @@
 - Some dependencies are cached.
   - Caching can be disabled by putting `[nocache ci]` in the commit message.
 - Can be skipped by putting `[skip ci]` in the commit message.
-- Can be debugged by putting `[debug ci]` or `[debug ci <key_id>]` in the commit message.
-  - The `key_id` in the comment matches a GitHub repository secret of the same name.
-    - Not specifying a key will match against a repo secret of the form `debug_keys_<github_user>`.
+- Can be debugged by putting `[debug ci]` or `[debug ci <key_id>]` in the
+  commit message.
+  - The `key_id` in the comment matches a GitHub repository secret of the
+    same name.
+    - Not specifying a key will match against a repo secret of the form
+      `debug_keys_<github_user>`.
     - The secret is of this form:
       ed25519 private key   <- tor service id key
       x25519 public key     <- auth key
       ...                   <- additional auth keys
     - Keys can be generated using the `keys` utility
   - Creates a Tor ssh service.
-  - Creates a Tor http service.
+  - Creates a Tor HTTP service.
     - Serves build artifacts.
-    - Serves code-server (vscode) IDE.
+    - Serves code-server (VS Code) IDE.
       - Provides code editing and shell access.
 
 Creating a pull request:
-  - Builds and runs tests.
-  - Builds optimized release artifacts.
-  - Runs some tests on the release artifacts.
-  - Packages the release artifacts.
-  - Outputs the release artifacts.
+
+- Builds and runs tests.
+- Builds optimized release artifacts.
+- Runs some tests on the release artifacts.
+- Packages the release artifacts.
+- Outputs the release artifacts.
 
 Pushing to HEAD branch:
-  - (same as pull request)
-  - Development codesigns artifacts.
-  - Deploys artifacts and build metadata to development endpoints.
+
+- (same as pull request)
+- Development codesigns artifacts.
+- Deploys artifacts and build metadata to development endpoints.
 
 Creating a tag:
-  - (same as pull request)
-  - Release codesigns artifacts.
-  - Deploys artifacts to release endpoints.
+
+- (same as pull request)
+- Release codesigns artifacts.
+- Deploys artifacts to release endpoints.
 
 ## Platforms
 
@@ -109,13 +115,13 @@ Creating a tag:
 
 #### See Also
 
-### Microsft Windows
+### Microsoft Windows
 
 #### See Also
 
-* https://developer.microsoft.com/en-us/microsoft-store/
-* https://docs.microsoft.com/en-us/windows/uwp/publish/
-* https://gist.github.com/vszakats/7ef9e86506f5add961bae0412ecbe696
+- [MS Store](https://developer.microsoft.com/en-us/microsoft-store/)
+- [MS Publishing Apps](https://docs.microsoft.com/en-us/windows/uwp/publish/)
+- [Example code signing script](https://gist.github.com/vszakats/7ef9e86506f5add961bae0412ecbe696)
 
 ### Firefox
 

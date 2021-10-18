@@ -11,3 +11,5 @@ ifconfig
 sudo pfctl -s all
 
 brew list --versions
+
+brew install tor

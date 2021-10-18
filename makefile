@@ -1,4 +1,4 @@
-all: cicd secrets keys
+build: cicd secrets keys
 
 cicd: cicd.nim secrets.nim keys.nim
 	nim c -o:$@ $@.nim
@@ -8,3 +8,17 @@ secrets: secrets.nim
 
 keys: keys.nim
 	nim c -o:$@ $@.nim
+
+check:
+	nimble check
+	find . -name '*.sh' -exec shellcheck {} \;
+	find . -name '*.md' -exec aspell --dont-backup --personal ./dict.pws check {} \;
+	markdownlint .
+
+format:
+	find . -name '*.sh' -exec shfmt -w {} \;
+
+clean:
+	git clean -fX
+
+pre-commit: format check

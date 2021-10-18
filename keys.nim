@@ -119,6 +119,26 @@ proc pubOnionAuthKey*(pubEd25519 = ""): string =
         result = "descriptor:x25519:" & base32.encode(result)
         result.removeSuffix '='
 
+proc pubSshAuthKey*(secEd25519 = "", pubEd25519 = "", comment = ""): string =
+    if comment.len == 0:
+        stderr.writeLine "error: missing ssh key comment"
+        quit 1
+    block:
+        var secEd25519 = if secEd25519.len == 0: stdin.readAll else: secEd25519
+        if secEd25519.len != crypto_sign_ed25519_SECRETKEYBYTES:
+            if secEd25519.len == crypto_sign_ed25519_SECRETKEYBYTES+1 and secEd25519[^1] == '\n':
+                secEd25519.removeSuffix '\n'
+                doAssert secEd25519.len == 64
+            else:
+                stderr.writeLine "error: secret ed25519 key size must be " & $crypto_sign_ed25519_SECRETKEYBYTES & " bytes"
+                quit 1
+        var pubEd25519 =
+            if pubEd25519.len == 0:
+                pubEd25519(secEd25519)
+            else:
+                pubEd25519
+        result = "ssh-ed25519 " & base64.encode(pubEd25519) & " " & comment
+
 proc secSshAuthKey*(secEd25519 = "", pubEd25519 = "", comment = ""): string =
     if comment.len == 0:
         stderr.writeLine "error: missing ssh key comment"
