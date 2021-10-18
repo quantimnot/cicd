@@ -16,12 +16,12 @@ import
 
 type
     Keys* {.sparse.} = object
-        onionAddr: string
-        secOnionKey: string
-        secOnionAuthKey: string
-        secSshAuthKey: string
-        pubSshAuthKeys: seq[string]
-        pubOnionAuthKeys: seq[string]
+        onionAddr*: string
+        secOnionKey*: string
+        secOnionAuthKey*: string
+        secSshAuthKey*: string
+        pubSshAuthKeys*: seq[string]
+        pubOnionAuthKeys*: seq[string]
 
 {.passL: "-lsodium"}
 let crypto_pwhash_ALG_ARGON2ID13 {.importc: "crypto_pwhash_ALG_ARGON2ID13", header: "<sodium.h>".}: cint
@@ -117,27 +117,6 @@ proc pubOnionAuthKey*(pubEd25519 = ""): string =
         result = newString(crypto_sign_ed25519_PUBLICKEYBYTES)
         doAssert crypto_sign_ed25519_pk_to_curve25519(result.ptrByte, pubEd25519.ptrByte) == 0
         result = "descriptor:x25519:" & base32.encode(result)
-        result.removeSuffix '='
-
-proc pubSshAuthKey*(secEd25519 = "", pubEd25519 = "", comment = ""): string =
-    if comment.len == 0:
-        stderr.writeLine "error: missing ssh key comment"
-        quit 1
-    block:
-        var secEd25519 = if secEd25519.len == 0: stdin.readAll else: secEd25519
-        if secEd25519.len != crypto_sign_ed25519_SECRETKEYBYTES:
-            if secEd25519.len == crypto_sign_ed25519_SECRETKEYBYTES+1 and secEd25519[^1] == '\n':
-                secEd25519.removeSuffix '\n'
-                doAssert secEd25519.len == 64
-            else:
-                stderr.writeLine "error: secret ed25519 key size must be " & $crypto_sign_ed25519_SECRETKEYBYTES & " bytes"
-                quit 1
-        var pubEd25519 =
-            if pubEd25519.len == 0:
-                pubEd25519(secEd25519)
-            else:
-                pubEd25519
-        result = "ssh-ed25519 " & base64.encode(pubEd25519) & " " & comment
 
 proc secSshAuthKey*(secEd25519 = "", pubEd25519 = "", comment = ""): string =
     if comment.len == 0:
@@ -192,6 +171,27 @@ proc secSshAuthKey*(secEd25519 = "", pubEd25519 = "", comment = ""): string =
             "-----BEGIN OPENSSH PRIVATE KEY-----\n" &
             opensshKey() &
             "\n-----END OPENSSH PRIVATE KEY-----\n"
+        result.removeSuffix '='
+
+proc pubSshAuthKey*(secEd25519 = "", pubEd25519 = "", comment = ""): string =
+    if comment.len == 0:
+        stderr.writeLine "error: missing ssh key comment"
+        quit 1
+    block:
+        var secEd25519 = if secEd25519.len == 0: stdin.readAll else: secEd25519
+        if secEd25519.len != crypto_sign_ed25519_SECRETKEYBYTES:
+            if secEd25519.len == crypto_sign_ed25519_SECRETKEYBYTES+1 and secEd25519[^1] == '\n':
+                secEd25519.removeSuffix '\n'
+                doAssert secEd25519.len == 64
+            else:
+                stderr.writeLine "error: secret ed25519 key size must be " & $crypto_sign_ed25519_SECRETKEYBYTES & " bytes"
+                quit 1
+        var pubEd25519 =
+            if pubEd25519.len == 0:
+                pubEd25519(secEd25519)
+            else:
+                pubEd25519
+        result = "ssh-ed25519 " & base64.encode(pubEd25519) & " " & comment
 
 proc onionAddr*(pubEd25519 = ""): string =
     # from: https://gitweb.torproject.org/torspec.git/tree/address-spec.txt
@@ -234,12 +234,13 @@ proc all*(passwd = "", comment = "*"): string =
         let secEd25519 = secEd25519 seed
         let pubEd25519 = pubEd25519 secEd25519
         var keys: Keys
-        keys.secOnionKey = secOnionKey secEd25519
+        keys.secOnionKey = base64.encode(secOnionKey secEd25519)
         keys.onionAddr = onionAddr pubEd25519
         keys.secSshAuthKey = secSshAuthKey(secEd25519, pubEd25519, comment)
-        # keys.secOnionKey = pubSsh
+        keys.pubSshAuthKeys.add pubSshAuthKey(secEd25519, pubEd25519, comment)
         keys.secOnionAuthKey = secOnionAuthKey secEd25519
         keys.pubOnionAuthKeys.add pubOnionAuthKey pubEd25519
+        result = dump keys
 
 #     # stderr.writeLine:
 #     #     "Client-side:\n" &
@@ -272,7 +273,7 @@ proc x509*(): string =
     # TODO
     discard
 
-proc installSsh*(file = "") =
+proc installSsh*(file = "", path = getHomeDir()/".ssh") =
     var keys: Keys
     if file.len > 0:
         load(newFileStream(file), keys)
@@ -280,8 +281,8 @@ proc installSsh*(file = "") =
         load(newFileStream(stdin), keys)
     discard umask(0o077.Mode)
     if keys.pubSshAuthKeys.len > 0:
-        createDir(getHomeDir()/".ssh/")
-        var authorizedKeys = open(getHomeDir()/".ssh/authorized_keys", fmAppend)
+        createDir(path)
+        var authorizedKeys = open(path/"authorized_keys", fmAppend)
         for key in keys.pubSshAuthKeys:
             authorizedKeys.writeLine(key)
     quit 1
@@ -293,6 +294,9 @@ proc installOnion*(file = "", path: string) =
     else:
         load(newFileStream(stdin), keys)
     discard umask(0o077.Mode)
+    if not path.dirExists:
+        stderr.writeLine "creating onion hidden service path: " & path
+        createDir(path)
     if keys.onionAddr.len > 0 and keys.secOnionKey.len > 0:
         writeFile(path/"hs_ed25519_secret_key", base64.decode(keys.secOnionKey))
         writeFile(path/"hostname", keys.onionAddr & '\n')
@@ -313,6 +317,7 @@ when isMainModule:
         [secOnionAuthKey],
         [pubOnionAuthKey],
         [secSshAuthKey],
+        [pubSshAuthKey],
         [kdf],
         [all],
         [installOnion, cmdName = "install-onion", help={"file": "keys file", "path": "Onion hidden service directory"}],
